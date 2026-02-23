@@ -1,0 +1,17 @@
+[project]
+name = "identity-service"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "bcrypt>=5.0.0",
+    "fastapi>=0.132.0",
+    "pydantic[email]>=2.12.5",
+    "pyjwt>=2.11.0",
+    "shared",
+    "uvicorn>=0.41.0",
+]
+
+[tool.uv.sources]
+shared = { path = "../shared", editable = true }
