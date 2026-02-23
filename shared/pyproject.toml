@@ -1,0 +1,18 @@
+[project]
+name = "shared"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "rajithaeyee", email = "rajithaeye@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "psycopg2-binary>=2.9.11",
+    "pydantic-settings>=2.13.1",
+    "sqlalchemy>=2.0.46",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.18,<0.10.0"]
+build-backend = "uv_build"
