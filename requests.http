@@ -1,0 +1,63 @@
+@baseUrl = http://localhost:8001
+
+### Health Check
+GET {{baseUrl}}/health
+
+### Create Submission - Anonymous
+POST {{baseUrl}}/api/submissions/
+Content-Type: application/json
+
+{
+  "company": "WSO2",
+  "role": "Software Engineer",
+  "level": "Mid",
+  "country": "Sri Lanka",
+  "city": "Colombo",
+  "salary_amount": 750000,
+  "currency": "LKR",
+  "experience_years": 3,
+  "anonymize": false
+}
+
+### Create Submission - Anonymized
+POST {{baseUrl}}/api/submissions/
+Content-Type: application/json
+
+{
+  "company": "Sysco LABS",
+  "role": "DevOps Engineer",
+  "level": "Senior",
+  "country": "Sri Lanka",
+  "city": "Colombo",
+  "salary_amount": 1200000,
+  "currency": "LKR",
+  "experience_years": 5,
+  "anonymize": true
+}
+
+### Create Submission - Minimal Fields
+POST {{baseUrl}}/api/submissions/
+Content-Type: application/json
+
+{
+  "company": "IFS",
+  "role": "QA Engineer",
+  "level": "Junior",
+  "country": "Sri Lanka",
+  "salary_amount": 350000,
+  "currency": "LKR",
+  "experience_years": 1,
+  "anonymize": false
+}
+
+### Get All Submissions
+GET {{baseUrl}}/api/submissions/
+
+### Get All Submissions - With Pagination
+GET {{baseUrl}}/api/submissions/?skip=0&limit=10
+
+### Get Submission By ID (replace with actual UUID)
+GET {{baseUrl}}/api/submissions/REPLACE_WITH_UUID
+
+### Get Non-Existent Submission (should return 404)
+GET {{baseUrl}}/api/submissions/00000000-0000-0000-0000-000000000000
