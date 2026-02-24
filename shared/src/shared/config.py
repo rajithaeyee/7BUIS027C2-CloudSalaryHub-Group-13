@@ -6,6 +6,7 @@ class DatabaseSettings(BaseSettings):
 
     class Config:
         env_file = ".env"
+        extra = "ignore"
 
 
 db_settings = DatabaseSettings()
