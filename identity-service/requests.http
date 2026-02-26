@@ -1,0 +1,58 @@
+@baseUrl = http://localhost:8003
+
+### Health Check
+GET {{baseUrl}}/health
+
+### Signup
+POST {{baseUrl}}/api/auth/signup
+Content-Type: application/json
+
+{
+  "email": "rajitha@example.com",
+  "username": "rajitha",
+  "password": "securepass123"
+}
+
+### Signup - Second User
+POST {{baseUrl}}/api/auth/signup
+Content-Type: application/json
+
+{
+  "email": "john@example.com",
+  "username": "john",
+  "password": "securepass456"
+}
+
+### Signup - Duplicate Email (should return 409)
+POST {{baseUrl}}/api/auth/signup
+Content-Type: application/json
+
+{
+  "email": "rajitha@example.com",
+  "username": "rajitha2",
+  "password": "securepass789"
+}
+
+### Login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "rajitha@example.com",
+  "password": "securepass123"
+}
+
+### Login - Wrong Password (should return 401)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "rajitha@example.com",
+  "password": "wrongpassword"
+}
+
+### Verify Token (replace with actual token from login response)
+POST {{baseUrl}}/api/auth/verify-token?token=REPLACE_WITH_TOKEN
+
+### Get Current User (replace with actual UUID from signup/login response)
+GET {{baseUrl}}/api/auth/me?user_id=REPLACE_WITH_UUID

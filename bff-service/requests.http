@@ -1,0 +1,54 @@
+@baseUrl = http://localhost:8000
+@token = REPLACE_WITH_TOKEN
+
+### Health Check
+GET {{baseUrl}}/health
+
+### ========== AUTH (no login required) ==========
+
+### Signup
+POST {{baseUrl}}/api/auth/signup
+Content-Type: application/json
+
+{
+  "email": "rajithaaaa@example.com",
+  "username": "rajithaax",
+  "password": "securepass123"
+}
+
+### Login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "rajitha@example.com",
+  "password": "securepass123"
+}
+
+### Get Current User (requires auth)
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer {{token}}
+
+### ========== SALARY SUBMISSION (no login required) ==========
+
+### Submit Salary
+POST {{baseUrl}}/api/salaries/
+Content-Type: application/json
+
+{
+  "company": "WSO2",
+  "role": "Software Engineer",
+  "level": "Mid",
+  "country": "Sri Lanka",
+  "city": "Colombo",
+  "salary_amount": 7500000,
+  "currency": "LKR",
+  "experience_years": 10,
+  "anonymize": false
+}
+
+### List All Submissions
+GET {{baseUrl}}/api/salaries/
+
+### Get Submission By ID
+GET {{baseUrl}}/api/salaries/REPLACE_WITH_UUID
