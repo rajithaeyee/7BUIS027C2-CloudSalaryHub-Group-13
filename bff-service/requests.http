@@ -52,3 +52,20 @@ GET {{baseUrl}}/api/salaries/
 
 ### Get Submission By ID
 GET {{baseUrl}}/api/salaries/REPLACE_WITH_UUID
+
+
+### ========== SEARCH ==========
+GET {{baseUrl}}/api/search/?country=Sri%20Lanka
+
+### ========== STATS ==========
+GET {{baseUrl}}/api/stats/?country=Sri%20Lanka
+
+### ========== VOTE (requires auth) ==========
+POST {{baseUrl}}/api/votes/
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "submission_id": "8a7bd381-0bc9-4d88-8e50-0071604456a7",
+  "vote_type": "UPVOTE"
+}
