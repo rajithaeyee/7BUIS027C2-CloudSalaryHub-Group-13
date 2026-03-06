@@ -16,7 +16,13 @@ const HomePage = () => {
     setLoading(true);
     try {
       const response = await searchSalaries(filters);
-      setSalaries(response.data);
+      setSalaries(
+        Array.isArray(response?.data)
+          ? response.data
+          : Array.isArray(response?.data)
+            ? response.data
+            : []
+      );
     } catch (error) {
       console.error("Failed to fetch salaries", error);
     } finally {

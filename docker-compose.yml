@@ -1,0 +1,56 @@
+services:
+  db:
+    image: postgres:17
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    env_file:
+      - postgres.env
+    ports:
+      - "5435:5432"
+
+  bff-service:
+    build:
+      context: .
+      dockerfile: bff-service/Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./bff-service/.env
+    depends_on:
+      - db
+
+  identity-service:
+    build:
+      context: .
+      dockerfile: identity-service/Dockerfile
+    ports:
+      - "8001:8001"
+    env_file:
+      - ./identity-service/.env
+    depends_on:
+      - db
+  salary-submission-service:
+    build:
+      context: .
+      dockerfile: salary-submission-service/Dockerfile
+    ports:
+      - "8002:8002"
+    env_file:
+      - ./salary-submission-service/.env
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    stdin_open: true
+    tty: true
+    depends_on:
+      - bff-service
+
+volumes:
+  postgres_data:
