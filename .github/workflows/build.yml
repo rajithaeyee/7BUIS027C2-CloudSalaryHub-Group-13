@@ -22,13 +22,13 @@ jobs:
         run: |
           cd identity-service
           uv sync --no-dev
-          uv run python -c "from app.main import app; print('identity-service OK')"
+          DATABASE_URL=postgresql://test:test@localhost:5432/test uv run python -c "from app.main import app; print('identity-service OK')"
 
       - name: Check salary-submission-service
         run: |
           cd salary-submission-service
           uv sync --no-dev
-          uv run python -c "from app.main import app; print('salary-submission-service OK')"
+          DATABASE_URL=postgresql://test:test@localhost:5432/test uv run python -c "from app.main import app; print('salary-submission-service OK')"
 
       - name: Check bff-service
         run: |
