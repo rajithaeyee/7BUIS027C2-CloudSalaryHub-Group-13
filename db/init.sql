@@ -17,6 +17,15 @@ CREATE TABLE identity.users (
 
 CREATE INDEX idx_users_email ON identity.users(email);
 
+CREATE TABLE identity.blocked_tokens (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    token_hash VARCHAR(64) UNIQUE NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_blocked_tokens_token_hash ON identity.blocked_tokens(token_hash);
+
 -- =====================
 -- SALARY SCHEMA
 -- =====================
