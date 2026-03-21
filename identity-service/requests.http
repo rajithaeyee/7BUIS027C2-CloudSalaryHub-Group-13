@@ -53,10 +53,10 @@ Content-Type: application/json
 
 ### Logout (replace with actual token from login response)
 POST {{baseUrl}}/api/auth/logout
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0ZGJlOTk4Zi05NjJmLTRkNmItODkxYS1kNjQyYzNiZTE3ZDYiLCJ1c2VybmFtZSI6InJhaml0aGEiLCJleHAiOjE3NzQwNTg3NTYsImlhdCI6MTc3NDA1NTE1Nn0.RI6cgqE5cLWSCWuElOmDo5ntK3mTq6IlbAFHYBUEW4w
+Authorization: Bearer TOKEN
 
 ### Verify Token (replace with actual token from login response)
-POST {{baseUrl}}/api/auth/verify-token?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0ZGJlOTk4Zi05NjJmLTRkNmItODkxYS1kNjQyYzNiZTE3ZDYiLCJ1c2VybmFtZSI6InJhaml0aGEiLCJleHAiOjE3NzQwNTg3NTYsImlhdCI6MTc3NDA1NTE1Nn0.RI6cgqE5cLWSCWuElOmDo5ntK3mTq6IlbAFHYBUEW4w
+POST {{baseUrl}}/api/auth/verify-token?token=TOKEN
 
 ### Get Current User (replace with actual UUID from signup/login response)
 GET {{baseUrl}}/api/auth/me?user_id=REPLACE_WITH_UUID
