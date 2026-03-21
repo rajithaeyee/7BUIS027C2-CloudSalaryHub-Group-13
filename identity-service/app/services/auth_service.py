@@ -1,3 +1,4 @@
+import hashlib
 from uuid import UUID
 from datetime import datetime, timedelta, timezone
 
@@ -5,7 +6,7 @@ import jwt
 import bcrypt
 from sqlalchemy.orm import Session
 
-from shared.models.identity import User
+from shared.models.identity import User, BlockedToken
 from app.schemas import SignupRequest
 from app.config import settings
 
@@ -50,14 +51,29 @@ class AuthService:
         }
         return jwt.encode(payload, settings.JWT_SECRET, algorithm=settings.JWT_ALGORITHM)
 
+    def invalidate_token(self, token: str) -> None:
+        token_hash = hashlib.sha256(token.encode()).hexdigest()
+        try:
+            payload = jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM])
+            expires_at = datetime.fromtimestamp(payload["exp"], tz=timezone.utc).replace(tzinfo=None)
+        except jwt.PyJWTError:
+            expires_at = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(minutes=settings.JWT_EXPIRATION_MINUTES)
+        blocked = BlockedToken(token_hash=token_hash, expires_at=expires_at)
+        self.db.add(blocked)
+        self.db.commit()
+
     def decode_token(self, token: str) -> dict | None:
         try:
             payload = jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM])
-            return {"user_id": payload["sub"], "username": payload["username"]}
         except jwt.ExpiredSignatureError:
             return None
         except jwt.InvalidTokenError:
             return None
+        token_hash = hashlib.sha256(token.encode()).hexdigest()
+        blocked = self.db.query(BlockedToken).filter(BlockedToken.token_hash == token_hash).first()
+        if blocked:
+            return None
+        return {"user_id": payload["sub"], "username": payload["username"]}
 
     def get_by_email(self, email: str) -> User | None:
         return self.db.query(User).filter(User.email == email).first()

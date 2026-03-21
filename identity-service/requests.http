@@ -1,4 +1,4 @@
-@baseUrl = http://localhost:8003
+@baseUrl = http://localhost:8000
 
 ### Health Check
 GET {{baseUrl}}/health
@@ -8,8 +8,8 @@ POST {{baseUrl}}/api/auth/signup
 Content-Type: application/json
 
 {
-  "email": "rajitha@example.com",
-  "username": "rajitha",
+  "email": "rajitha@example2.com",
+  "username": "rajithaeyee",
   "password": "securepass123"
 }
 
@@ -51,8 +51,12 @@ Content-Type: application/json
   "password": "wrongpassword"
 }
 
+### Logout (replace with actual token from login response)
+POST {{baseUrl}}/api/auth/logout
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0ZGJlOTk4Zi05NjJmLTRkNmItODkxYS1kNjQyYzNiZTE3ZDYiLCJ1c2VybmFtZSI6InJhaml0aGEiLCJleHAiOjE3NzQwNTg3NTYsImlhdCI6MTc3NDA1NTE1Nn0.RI6cgqE5cLWSCWuElOmDo5ntK3mTq6IlbAFHYBUEW4w
+
 ### Verify Token (replace with actual token from login response)
-POST {{baseUrl}}/api/auth/verify-token?token=REPLACE_WITH_TOKEN
+POST {{baseUrl}}/api/auth/verify-token?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0ZGJlOTk4Zi05NjJmLTRkNmItODkxYS1kNjQyYzNiZTE3ZDYiLCJ1c2VybmFtZSI6InJhaml0aGEiLCJleHAiOjE3NzQwNTg3NTYsImlhdCI6MTc3NDA1NTE1Nn0.RI6cgqE5cLWSCWuElOmDo5ntK3mTq6IlbAFHYBUEW4w
 
 ### Get Current User (replace with actual UUID from signup/login response)
 GET {{baseUrl}}/api/auth/me?user_id=REPLACE_WITH_UUID

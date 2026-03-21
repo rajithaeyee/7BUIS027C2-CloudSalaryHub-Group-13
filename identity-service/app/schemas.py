@@ -31,3 +31,8 @@ class TokenResponse(BaseModel):
     token_type: str = "bearer"
     user_id: UUID
     username: str
+
+
+class SignupResponse(UserResponse):
+    access_token: str
+    token_type: str = "bearer"
