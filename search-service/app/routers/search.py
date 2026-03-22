@@ -14,12 +14,13 @@ def search(
     role: Optional[str] = Query(None),
     country: Optional[str] = Query(None),
     level: Optional[str] = Query(None),
+    include_pending: bool = Query(False),
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db)
 ):
     service = SearchService(db)
-    results = service.search(company, role, country, level, skip, limit)
+    results = service.search(company, role, country, level, include_pending, skip, limit)
     # Apply anonymization
     for res in results:
         if res.anonymize:

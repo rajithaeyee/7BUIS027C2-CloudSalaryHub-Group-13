@@ -19,5 +19,9 @@ async def create_vote(
             headers=headers
         )
     if resp.status_code != 201:
-        raise HTTPException(status_code=resp.status_code, detail=resp.json())
+        # Try to parse JSON, fallback to raw text
+        try:
+            detail = resp.json()
+        except Exception:
+            detail = resp.text or "Unknown error"
     return resp.json()

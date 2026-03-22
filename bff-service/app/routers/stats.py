@@ -15,5 +15,10 @@ async def get_stats(
     async with httpx.AsyncClient() as client:
         resp = await client.get(f"{settings.STATS_SERVICE_URL}/api/stats/", params=params)
     if resp.status_code != 200:
-        raise HTTPException(status_code=resp.status_code, detail=resp.json())
+        # Try to parse JSON, fallback to raw text
+        try:
+            detail = resp.json()
+        except Exception:
+            detail = resp.text or "Unknown error"
+        raise HTTPException(status_code=resp.status_code, detail=detail)
     return resp.json()

@@ -1,5 +1,4 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import or_
 from shared.models.salary import SalarySubmission, SubmissionStatus
 from typing import List, Optional
 
@@ -13,12 +12,18 @@ class SearchService:
         role: Optional[str] = None,
         country: Optional[str] = None,
         level: Optional[str] = None,
+        include_pending: bool = False,
         skip: int = 0,
         limit: int = 20
     ) -> List[SalarySubmission]:
+        # Start with approved submissions
+        statuses = [SubmissionStatus.APPROVED]
+        if include_pending:
+            statuses.append(SubmissionStatus.PENDING)
         query = self.db.query(SalarySubmission).filter(
-            SalarySubmission.status == SubmissionStatus.APPROVED
+            SalarySubmission.status.in_(statuses)
         )
+
         if company:
             query = query.filter(SalarySubmission.company.ilike(f"%{company}%"))
         if role:

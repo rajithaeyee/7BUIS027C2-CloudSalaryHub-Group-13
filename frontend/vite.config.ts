@@ -8,7 +8,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:3000', // BFF will run on this port
+        target: 'http://localhost:8000', // BFF will run on this port
         changeOrigin: true,
       },
     },

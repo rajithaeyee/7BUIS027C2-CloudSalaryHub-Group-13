@@ -1,34 +1,40 @@
 export interface SalarySubmission {
-  id: number;
+  id: string;            // UUID
   company: string | null;
   role: string;
   level: string | null;
   country: string;
-  salary: number;
+  city?: string | null;   // optional
+  salary_amount: number;  // backend field name
   currency: string;
+  experience_years: number;
   anonymize: boolean;
   status: 'PENDING' | 'APPROVED';
   created_at: string;
 }
 
 export interface User {
-  id: number;
+  id: string;
   email: string;
+  username: string;
 }
 
 export interface AuthResponse {
-  token: string;
+  access_token: string;
+  token_type: string;
+  user_id: string;
+  username: string;
 }
 
 export interface Stats {
-  average: number;
-  median: number;
-  p25: number;
-  p75: number;
+  average: number | null;
+  median: number | null;
+  p25: number | null;
+  p75: number | null;
   count: number;
 }
 
 export interface VotePayload {
-  submissionId: number;
-  voteType: boolean; // true = upvote, false = downvote
+  submission_id: string;
+  vote_type: 'UPVOTE' | 'DOWNVOTE';
 }
