@@ -15,6 +15,7 @@ class SalarySearchResult(BaseModel):
     currency: str
     experience_years: int
     anonymize: bool
+    status: str
     created_at: datetime
 
     class Config:

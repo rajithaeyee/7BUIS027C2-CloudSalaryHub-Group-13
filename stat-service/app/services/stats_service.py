@@ -1,3 +1,4 @@
+from decimal import Decimal
 from sqlalchemy.orm import Session
 from shared.models.salary import SalarySubmission, SubmissionStatus
 from typing import Optional
@@ -16,30 +17,36 @@ class StatsService:
         if role:
             query = query.filter(SalarySubmission.role == role)
 
-        salaries = [row[0] for row in query.all()]
+        salaries = [row[0] for row in query.all()]  # list of Decimal
         count = len(salaries)
         if count == 0:
             return StatsResponse(average=None, median=None, p25=None, p75=None, count=0)
 
-        avg = sum(salaries) / count
-        sorted_sal = sorted(salaries)
+        # Convert Decimal to float for calculations
+        salaries_float = [float(s) for s in salaries]
+        avg = sum(salaries_float) / count
+        sorted_sal = sorted(salaries_float)
+
         median = self._percentile(sorted_sal, 50)
         p25 = self._percentile(sorted_sal, 25)
         p75 = self._percentile(sorted_sal, 75)
 
         return StatsResponse(
-            average=avg,
+            average=Decimal(str(avg)),
             median=median,
             p25=p25,
             p75=p75,
             count=count
         )
 
-    def _percentile(self, data, percentile):
+    def _percentile(self, data: list, percentile: int) -> Optional[Decimal]:
+        if not data:
+            return None
         k = (len(data) - 1) * percentile / 100
         f = int(k)
         c = k - f
         if f + 1 < len(data):
-            return data[f] + c * (data[f+1] - data[f])
+            result = data[f] + c * (data[f+1] - data[f])
         else:
-            return data[f]
+            result = data[f]
+        return Decimal(str(result))

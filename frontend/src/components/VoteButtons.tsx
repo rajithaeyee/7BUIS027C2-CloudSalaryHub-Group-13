@@ -1,9 +1,13 @@
 import { useState } from "react";
 
-const VoteButtons = ({ onVote }: { onVote: (voteType: boolean) => void }) => {
-  const [voted, setVoted] = useState<boolean | null>(null);
+const VoteButtons = ({
+  onVote,
+}: {
+  onVote: (voteType: "UPVOTE" | "DOWNVOTE") => void;
+}) => {
+  const [voted, setVoted] = useState<"UPVOTE" | "DOWNVOTE" | null>(null);
 
-  const handleVote = (type: boolean) => {
+  const handleVote = (type: "UPVOTE" | "DOWNVOTE") => {
     setVoted(type);
     onVote(type);
   };
@@ -11,14 +15,14 @@ const VoteButtons = ({ onVote }: { onVote: (voteType: boolean) => void }) => {
   return (
     <div className="flex gap-4">
       <button
-        onClick={() => handleVote(true)}
-        className={`px-4 py-2 rounded ${voted === true ? "bg-green-600 text-white" : "bg-gray-200"}`}
+        onClick={() => handleVote("UPVOTE")}
+        className={`px-4 py-2 rounded ${voted === "UPVOTE" ? "bg-green-600 text-white" : "bg-gray-200"}`}
       >
         👍 Upvote
       </button>
       <button
-        onClick={() => handleVote(false)}
-        className={`px-4 py-2 rounded ${voted === false ? "bg-red-600 text-white" : "bg-gray-200"}`}
+        onClick={() => handleVote("DOWNVOTE")}
+        className={`px-4 py-2 rounded ${voted === "DOWNVOTE" ? "bg-red-600 text-white" : "bg-gray-200"}`}
       >
         👎 Downvote
       </button>

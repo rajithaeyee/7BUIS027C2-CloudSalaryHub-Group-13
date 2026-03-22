@@ -15,7 +15,7 @@ const SalaryDetailPage = () => {
     const fetchSubmission = async () => {
       if (!id) return;
       try {
-        const response = await getSubmission(parseInt(id));
+        const response = await getSubmission(id);
         setSubmission(response.data);
       } catch (error) {
         console.error("Failed to fetch submission", error);
@@ -26,17 +26,25 @@ const SalaryDetailPage = () => {
     fetchSubmission();
   }, [id]);
 
-  const handleVote = async (voteType: boolean) => {
+  const handleVote = async (voteType: "UPVOTE" | "DOWNVOTE") => {
     if (!id) return;
     try {
-      await vote(parseInt(id), voteType);
-      // Optionally show a success message or update UI
+      await vote(id, voteType);
+      // Optionally refresh the submission to see updated status
+      const response = await getSubmission(id);
+      setSubmission(response.data);
     } catch (error) {
       console.error("Vote failed", error);
     }
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-300 border-t-blue-600"></div>
+      </div>
+    );
+  }
   if (!submission) return <p>Salary not found</p>;
 
   return (
@@ -47,11 +55,14 @@ const SalaryDetailPage = () => {
         {submission.country}
       </p>
       <p className="text-4xl font-bold my-4">
-        {submission.currency} {submission.salary.toLocaleString()}
+        {submission.currency} {submission.salary_amount.toLocaleString()}
       </p>
       {submission.level && (
         <p className="text-gray-600">Level: {submission.level}</p>
       )}
+      <p className="text-gray-600">
+        Experience: {submission.experience_years} years
+      </p>
       <p className="text-sm text-gray-500">Status: {submission.status}</p>
       <p className="text-xs text-gray-400 mt-2">
         Submitted on {new Date(submission.created_at).toLocaleDateString()}
