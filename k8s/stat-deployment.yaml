@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stat-service
+  namespace: cloudsalaryhub
+  labels:
+    app.kubernetes.io/name: stat-service
+    app.kubernetes.io/part-of: cloudsalaryhub
+    app.kubernetes.io/component: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: stat-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: stat-service
+        app.kubernetes.io/part-of: cloudsalaryhub
+        app.kubernetes.io/component: backend
+    spec:
+      containers:
+        - name: stat-service
+          image: rajithaeyee/cloudsalaryhub-stat-service:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8004
+          envFrom:
+            - configMapRef:
+                name: app-config
+            - secretRef:
+                name: app-secrets
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
