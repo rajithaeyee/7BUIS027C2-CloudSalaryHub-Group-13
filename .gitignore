@@ -51,8 +51,4 @@ logs
 *.sw?
 Thumbs.db
 
-# ========================
-# Kubernetes (sensitive)
-# ========================
-k8s/**/secrets.yaml
-k8s/**/postgres-secret.yaml
+# secrets and scripts are committed on purpose since this is the assignment and needed to show the usage

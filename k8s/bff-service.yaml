@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: bff-service
+  namespace: cloudsalaryhub
+  labels:
+    app.kubernetes.io/name: bff-service
+    app.kubernetes.io/part-of: cloudsalaryhub
+    app.kubernetes.io/component: gateway
+  annotations:
+    app.kubernetes.io/description: "ClusterIP service for bff-service (API gateway)"
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: bff-service
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+      protocol: TCP
