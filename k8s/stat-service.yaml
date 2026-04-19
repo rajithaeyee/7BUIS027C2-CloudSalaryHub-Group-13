@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: stat-service
+  namespace: cloudsalaryhub
+  labels:
+    app.kubernetes.io/name: stat-service
+    app.kubernetes.io/part-of: cloudsalaryhub
+    app.kubernetes.io/component: backend
+  annotations:
+    app.kubernetes.io/description: "ClusterIP service for stat-service"
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: stat-service
+  ports:
+    - name: http
+      port: 8004
+      targetPort: 8004
+      protocol: TCP

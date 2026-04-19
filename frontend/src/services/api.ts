@@ -2,10 +2,9 @@ import axios from 'axios';
 import type { AuthResponse, SalarySubmission, Stats } from '../types';
 
 const api = axios.create({
-  baseURL: '/api', // proxy to BFF
+  baseURL: '/api',
 });
 
-// Add token to requests if available
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -14,23 +13,23 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Auth endpoints (match BFF)
+// Auth
 export const login = (email: string, password: string) =>
   api.post<AuthResponse>('/auth/login', { email, password });
 
 export const signup = (email: string, username: string, password: string) =>
-  api.post('/auth/signup', { email, username, password });   // note: username is required by BFF
+  api.post<AuthResponse>('/auth/signup', { email, username, password });
 
-export const getMe = () => api.get('/auth/me');  // to get current user after login
+export const getMe = () => api.get('/auth/me');
 
-// Salary submission (BFF uses /salaries)
+// Salaries
 export const submitSalary = (data: Omit<SalarySubmission, 'id' | 'status' | 'created_at'>) =>
   api.post('/salaries/', data);
 
 export const getSubmission = (id: string) =>
   api.get<SalarySubmission>(`/salaries/${id}`);
 
-// Search (BFF uses /search)
+// Search
 export const searchSalaries = (params: { company?: string; role?: string; country?: string }) =>
   api.get<SalarySubmission[]>('/search/', { params });
 

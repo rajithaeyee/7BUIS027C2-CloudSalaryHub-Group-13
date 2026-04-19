@@ -1,0 +1,85 @@
+name: Build, Push & Deploy
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+  EKS_CLUSTER: ${{ secrets.EKS_CLUSTER_NAME }}
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  docker-build-push:
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: meta
+        run: echo "tag=${GITHUB_SHA::8}" >> "$GITHUB_OUTPUT"
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build & push all services
+        run: |
+          TAG="${{ steps.meta.outputs.tag }}"
+          SERVICES=(
+            "identity-service:identity-service/Dockerfile:."
+            "salary-submission-service:salary-submission-service/Dockerfile:."
+            "search-service:search-service/Dockerfile:."
+            "stat-service:stat-service/Dockerfile:."
+            "vote-service:vote-service/Dockerfile:."
+            "bff-service:bff-service/Dockerfile:."
+            "frontend:frontend/Dockerfile:./frontend"
+          )
+          for entry in "${SERVICES[@]}"; do
+            IFS=':' read -r name dockerfile context <<< "$entry"
+            REPO="$ECR_REGISTRY/cloudsalaryhub/$name"
+            docker build -f "$dockerfile" -t "$REPO:$TAG" -t "$REPO:latest" "$context"
+            docker push "$REPO" --all-tags
+          done
+
+  deploy-to-eks:
+    needs: docker-build-push
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER }} --region ${{ env.AWS_REGION }}
+
+      - name: Apply manifests
+        run: kubectl apply -f k8s/
+
+      - name: Roll out new image tags
+        run: |
+          TAG="${{ needs.docker-build-push.outputs.image_tag }}"
+          NS=cloudsalaryhub
+          for DEPLOY in identity-service salary-submission-service search-service stat-service vote-service bff-service frontend; do
+            kubectl -n $NS set image deployment/$DEPLOY \
+              $DEPLOY=$ECR_REGISTRY/cloudsalaryhub/$DEPLOY:$TAG
+          done
+          for DEPLOY in identity-service salary-submission-service search-service stat-service vote-service bff-service frontend; do
+            kubectl -n $NS rollout status deployment/$DEPLOY --timeout=180s
+          done
+
+      - name: Summary
+        run: kubectl -n cloudsalaryhub get deployments,pods,ingress

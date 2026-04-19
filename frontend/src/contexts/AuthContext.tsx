@@ -1,5 +1,9 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
-import { login as apiLogin, getMe } from "../services/api";
+import {
+  login as apiLogin,
+  signup as apiSignup,
+  getMe,
+} from "../services/api";
 
 interface User {
   id: string;
@@ -10,9 +14,11 @@ interface User {
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  loading: boolean;
   isAuthenticated: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  signup: (email: string, username: string, password: string) => Promise<void>;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -24,19 +30,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [token, setToken] = useState<string | null>(
     localStorage.getItem("token"),
   );
+  const [loading, setLoading] = useState(!!localStorage.getItem("token"));
 
+  // Restore session on mount — validate stored token with the server
   useEffect(() => {
-    // If token exists, fetch user info
-    if (token) {
+    const storedToken = localStorage.getItem("token");
+    if (storedToken) {
       getMe()
         .then((response) => setUser(response.data))
         .catch(() => {
-          // Token invalid, clear it
           localStorage.removeItem("token");
           setToken(null);
-        });
+        })
+        .finally(() => setLoading(false));
     }
-  }, [token]);
+  }, []);
 
   const login = async (email: string, password: string) => {
     const response = await apiLogin(email, password);
@@ -44,6 +52,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     localStorage.setItem("token", access_token);
     setToken(access_token);
     setUser({ id: user_id, email, username });
+  };
+
+  const signup = async (email: string, username: string, password: string) => {
+    const response = await apiSignup(email, username, password);
+    const { access_token, user_id, username: name } = response.data;
+    localStorage.setItem("token", access_token);
+    setToken(access_token);
+    setUser({ id: user_id, email, username: name });
   };
 
   const logout = () => {
@@ -54,7 +70,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <AuthContext.Provider
-      value={{ user, token, login, logout, isAuthenticated: !!token }}
+      value={{
+        user,
+        token,
+        loading,
+        isAuthenticated: !!token,
+        login,
+        signup,
+        logout,
+      }}
     >
       {children}
     </AuthContext.Provider>

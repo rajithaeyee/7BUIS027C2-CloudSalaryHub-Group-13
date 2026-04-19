@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: cloudsalaryhub
+  labels:
+    app.kubernetes.io/name: frontend
+    app.kubernetes.io/part-of: cloudsalaryhub
+    app.kubernetes.io/component: frontend
+  annotations:
+    app.kubernetes.io/description: "ClusterIP service for frontend"
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: frontend
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+      protocol: TCP

@@ -1,8 +1,6 @@
-name: Build
+name: Frontend Build
 
 on:
-  push:
-    branches: [master]
   pull_request:
     branches: [master]
   workflow_dispatch:
@@ -15,33 +13,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v4
-
-      - name: Check identity-service
-        run: |
-          cd identity-service
-          uv sync --no-dev
-          DATABASE_URL=postgresql://test:test@localhost:5432/test uv run python -c "from app.main import app; print('identity-service OK')"
-
-      - name: Check salary-submission-service
-        run: |
-          cd salary-submission-service
-          uv sync --no-dev
-          DATABASE_URL=postgresql://test:test@localhost:5432/test uv run python -c "from app.main import app; print('salary-submission-service OK')"
-
-      - name: Check bff-service
-        run: |
-          cd bff-service
-          uv sync --no-dev
-          uv run python -c "from app.main import app; print('bff-service OK')"
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      - name: Check frontend
+      - name: Build frontend
         run: |
           cd frontend
           npm ci
