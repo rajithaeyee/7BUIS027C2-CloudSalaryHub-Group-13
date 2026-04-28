@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: stat-service
-  namespace: cloudsalaryhub
+  namespace: app
   labels:
     app.kubernetes.io/name: stat-service
     app.kubernetes.io/part-of: cloudsalaryhub

@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend
-  namespace: cloudsalaryhub
+  namespace: app
   labels:
     app.kubernetes.io/name: frontend
     app.kubernetes.io/part-of: cloudsalaryhub
@@ -26,8 +26,11 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: rajithaeyee/cloudsalaryhub-frontend:latest
-          imagePullPolicy: Always
+          # Local (microk8s / minikube) — Docker Hub image:
+          # image: rajithaeyee/cloudsalaryhub-frontend:latest
+          # AWS EKS rendered by GitHub Actions via envsubst:
+          image: ${ECR_REGISTRY}/cloudsalaryhub/frontend:${IMAGE_TAG}
+          imagePullPolicy: IfNotPresent
           ports:
             - name: http
               containerPort: 80

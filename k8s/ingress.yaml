@@ -1,13 +1,54 @@
+# =====================================================================
+# Local (microk8s / minikube) ingress-nginx — kept for reference.
+# Uncomment for local clusters; comment the AWS ALB block below.
+# ---------------------------------------------------------------------
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: cloudsalaryhub-ingress
+#   namespace: app
+# spec:
+#   ingressClassName: nginx
+#   rules:
+#     - host: cloudsalaryhub.local
+#       http:
+#         paths:
+#           - path: /api
+#             pathType: Prefix
+#             backend:
+#               service:
+#                 name: bff-service
+#                 port:
+#                   number: 8000
+#           - path: /
+#             pathType: Prefix
+#             backend:
+#               service:
+#                 name: frontend
+#                 port:
+#                   number: 80
+# =====================================================================
+
+# AWS EKS — Application Load Balancer via aws-load-balancer-controller.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: cloudsalaryhub-ingress
-  namespace: cloudsalaryhub
+  namespace: app
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+    alb.ingress.kubernetes.io/healthcheck-path: /healthz
+    alb.ingress.kubernetes.io/load-balancer-attributes: idle_timeout.timeout_seconds=60
+    # Add HTTPS once i have an ACM certificate:
+    # alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    # alb.ingress.kubernetes.io/ssl-redirect: '443'
+    # alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:<ACCOUNT_ID>:certificate/<CERT_ID>
 spec:
-  ingressClassName: nginx
+  ingressClassName: alb
   rules:
-    - host: cloudsalaryhub.local
-      http:
+    - http:
         paths:
           - path: /api
             pathType: Prefix
