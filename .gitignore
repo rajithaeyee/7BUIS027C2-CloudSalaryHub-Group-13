@@ -19,7 +19,6 @@ __pycache__/
 *.pyo
 .venv/
 .python-version
-uv.lock
 *.egg-info/
 *.egg
 
