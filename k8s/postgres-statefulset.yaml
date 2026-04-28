@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: postgres
-  namespace: cloudsalaryhub
+  namespace: data
   labels:
     app.kubernetes.io/name: postgres
     app.kubernetes.io/part-of: cloudsalaryhub
@@ -32,17 +32,17 @@ spec:
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
-                  name: app-secrets
+                  name: db-secrets
                   key: POSTGRES_USER
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: app-secrets
+                  name: db-secrets
                   key: POSTGRES_PASSWORD
             - name: POSTGRES_DB
               valueFrom:
                 configMapKeyRef:
-                  name: app-config
+                  name: db-config
                   key: POSTGRES_DB
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
@@ -98,8 +98,9 @@ spec:
           app.kubernetes.io/name: postgres
           app.kubernetes.io/part-of: cloudsalaryhub
       spec:
+        storageClassName: gp3
         accessModes:
           - ReadWriteOnce
         resources:
           requests:
-            storage: 1Gi
+            storage: 10Gi

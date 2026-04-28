@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-config
+  namespace: data
+  labels:
+    app.kubernetes.io/part-of: cloudsalaryhub
+    app.kubernetes.io/component: database
+  annotations:
+    app.kubernetes.io/description: "Non-secret PostgreSQL configuration (data namespace only)"
+data:
+  POSTGRES_DB: "cloud-salary-hub"

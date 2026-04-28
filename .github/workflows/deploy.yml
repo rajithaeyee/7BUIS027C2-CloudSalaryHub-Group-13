@@ -1,8 +1,8 @@
-name: Build, Push & Deploy
+name: CI/CD - Build, Push & Deploy to EKS
 
 on:
-  push:
-    branches: [master]
+  # push:
+  #   branches: [master]
   workflow_dispatch:
 
 env:
@@ -15,7 +15,8 @@ permissions:
   contents: read
 
 jobs:
-  docker-build-push:
+  build-push:
+    name: Build & push images to ECR
     runs-on: ubuntu-latest
     outputs:
       image_tag: ${{ steps.meta.outputs.tag }}
@@ -32,8 +33,19 @@ jobs:
 
       - uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build & push all services
+      - name: Ensure ECR repositories exist
         run: |
+          for name in identity-service salary-submission-service search-service stat-service vote-service bff-service frontend; do
+            aws ecr describe-repositories --repository-names "cloudsalaryhub/$name" >/dev/null 2>&1 \
+              || aws ecr create-repository \
+                   --repository-name "cloudsalaryhub/$name" \
+                   --image-scanning-configuration scanOnPush=true \
+                   --image-tag-mutability MUTABLE >/dev/null
+          done
+
+      - name: Build & push images
+        run: |
+          set -euo pipefail
           TAG="${{ steps.meta.outputs.tag }}"
           SERVICES=(
             "identity-service:identity-service/Dockerfile:."
@@ -48,13 +60,17 @@ jobs:
             IFS=':' read -r name dockerfile context <<< "$entry"
             REPO="$ECR_REGISTRY/cloudsalaryhub/$name"
             docker build -f "$dockerfile" -t "$REPO:$TAG" -t "$REPO:latest" "$context"
-            docker push "$REPO" --all-tags
+            docker push "$REPO:$TAG"
+            docker push "$REPO:latest"
           done
 
-  deploy-to-eks:
-    needs: docker-build-push
+  deploy:
+    name: Deploy to EKS
+    needs: build-push
     runs-on: ubuntu-latest
     environment: production
+    env:
+      IMAGE_TAG: ${{ needs.build-push.outputs.image_tag }}
     steps:
       - uses: actions/checkout@v4
 
@@ -64,22 +80,38 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Update kubeconfig
-        run: aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER }} --region ${{ env.AWS_REGION }}
+        run: aws eks update-kubeconfig --name "$EKS_CLUSTER" --region "$AWS_REGION"
+
+      - name: Render manifests (substitute ECR_REGISTRY & IMAGE_TAG)
+        run: |
+          set -euo pipefail
+          mkdir -p rendered
+          # Whitelist the variables to substitute so nginx config ($host, $uri, ...) is left intact.
+          for f in k8s/*.yaml; do
+            envsubst '${ECR_REGISTRY} ${IMAGE_TAG}' < "$f" > "rendered/$(basename "$f")"
+          done
+          echo "--- rendered image lines ---"
+          grep -h "image:" rendered/*.yaml || true
 
       - name: Apply manifests
-        run: kubectl apply -f k8s/
-
-      - name: Roll out new image tags
         run: |
-          TAG="${{ needs.docker-build-push.outputs.image_tag }}"
-          NS=cloudsalaryhub
-          for DEPLOY in identity-service salary-submission-service search-service stat-service vote-service bff-service frontend; do
-            kubectl -n $NS set image deployment/$DEPLOY \
-              $DEPLOY=$ECR_REGISTRY/cloudsalaryhub/$DEPLOY:$TAG
+          # Apply namespaces first so dependent resources land cleanly.
+          kubectl apply -f rendered/namespace.yaml
+          kubectl apply -f rendered/
+
+      - name: Wait for rollouts
+        run: |
+          set -euo pipefail
+          for d in identity-service salary-submission-service search-service stat-service vote-service bff-service frontend; do
+            kubectl -n app rollout status deployment/$d --timeout=300s
           done
-          for DEPLOY in identity-service salary-submission-service search-service stat-service vote-service bff-service frontend; do
-            kubectl -n $NS rollout status deployment/$DEPLOY --timeout=180s
-          done
+          kubectl -n data rollout status statefulset/postgres --timeout=300s
 
       - name: Summary
-        run: kubectl -n cloudsalaryhub get deployments,pods,ingress
+        run: |
+          echo "--- app namespace ---"
+          kubectl -n app  get deployments,pods,svc,ingress
+          echo "--- data namespace ---"
+          kubectl -n data get statefulset,pods,svc,pvc
+          echo "--- ALB DNS ---"
+          kubectl -n app get ingress cloudsalaryhub-ingress -o jsonpath='{.status.loadBalancer.ingress[0].hostname}{"\n"}'

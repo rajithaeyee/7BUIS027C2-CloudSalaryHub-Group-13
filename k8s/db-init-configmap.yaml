@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: db-init-config
-  namespace: cloudsalaryhub
+  namespace: data
   labels:
     app.kubernetes.io/part-of: cloudsalaryhub
     app.kubernetes.io/component: database

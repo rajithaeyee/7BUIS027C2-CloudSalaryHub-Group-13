@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: stat-service
-  namespace: cloudsalaryhub
+  namespace: app
   labels:
     app.kubernetes.io/name: stat-service
     app.kubernetes.io/part-of: cloudsalaryhub
@@ -26,8 +26,11 @@ spec:
     spec:
       containers:
         - name: stat-service
-          image: rajithaeyee/cloudsalaryhub-stat-service:latest
-          imagePullPolicy: Always
+          # Local (microk8s / minikube) — Docker Hub image:
+          # image: rajithaeyee/cloudsalaryhub-stat-service:latest
+          # AWS EKS rendered by GitHub Actions via envsubst:
+          image: ${ECR_REGISTRY}/cloudsalaryhub/stat-service:${IMAGE_TAG}
+          imagePullPolicy: IfNotPresent
           ports:
             - name: http
               containerPort: 8004
