@@ -95,8 +95,12 @@ jobs:
 
       - name: Apply manifests
         run: |
-          # Apply namespaces first so dependent resources land cleanly.
+          set -euo pipefail
           kubectl apply -f rendered/namespace.yaml
+          if ! kubectl apply -f rendered/storageclass.yaml; then
+            kubectl delete storageclass gp3 --ignore-not-found
+            kubectl apply -f rendered/storageclass.yaml
+          fi
           kubectl apply -f rendered/
 
       - name: Wait for rollouts
