@@ -29,7 +29,17 @@
 #                   number: 80
 # =====================================================================
 
-# AWS EKS — Application Load Balancer via aws-load-balancer-controller.
+# AWS EKS Auto Mode — IngressClass binds to the built-in ALB controller.
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: alb
+  annotations:
+    ingressclass.kubernetes.io/is-default-class: "true"
+spec:
+  controller: eks.amazonaws.com/alb
+---
+# AWS EKS Auto Mode — Application Load Balancer via the built-in ALB controller.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
