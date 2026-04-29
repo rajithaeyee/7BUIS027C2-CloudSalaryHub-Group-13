@@ -1,8 +1,8 @@
 name: CI/CD - Build, Push & Deploy to EKS
 
 on:
-  # push:
-  #   branches: [master]
+  push:
+    branches: [master]
   workflow_dispatch:
 
 env:
